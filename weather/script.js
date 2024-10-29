@@ -1,12 +1,7 @@
 async function getWeather() {
-    const city = document.getElementById("city").value.trim();
+    const city = document.getElementById("city").value;
     if (!city) {
-        alert("Please enter a city name.");
-        return;
-    }
-
-    if (city !== "Ulaanbaatar") {
-        alert("Only weather information for Ulaanbaatar is available.");
+        alert("hotoo oruulna uu");
         return;
     }
 
@@ -15,12 +10,6 @@ async function getWeather() {
 
     try {
         const response = await fetch(apiUrl);
-        if (!response.ok) {
-            console.error(`Error: ${response.status} ${response.statusText}`);
-            alert("Failed to retrieve data. Please check your network connection.");
-            return;
-        }
-        
         const data = await response.json();
 
         if (data.cod !== 200) {
@@ -42,6 +31,6 @@ function displayWeather(data) {
         <p>Humidity: ${data.main.humidity}%</p>
         <p>Wind Speed: ${data.wind.speed} m/s</p>
     `;
-    document.getElementById("weather-icon").src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+    document.getElementById("weather-icon").src = `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
     document.getElementById("weather-icon").alt = data.weather[0].description;
 }
