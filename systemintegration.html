@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Sign-In & Weather</title>
+  <!-- Google Sign-In script -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    /* Basic styling */
+    body {
+      background-color: #f4f4f9;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;     
+    }
+    .bgimg{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("https://i.pinimg.com/736x/60/f3/b4/60f3b40f904c6aa05416389792b03897.jpg");
+        background-size: cover;
+        background-position: center;
+        filter: blur(3px);
+        background-repeat: no-repeat;
+        z-index: -1;
+    }
+
+    .main-container {
+      display: flex;
+      gap: 20px;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .card {
+      background-color: rgba(127, 152, 172, 0.7);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 40px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      color: #f5eaea;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .g_id_signin {
+      margin-top: 20px;
+    }
+
+    .card p {
+      color: #f5eaea;
+      font-size: 14px;
+    }
+
+    .weather-display {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 30px;
+      padding: 10px 20px;
+      position: absolute;
+      top: 10px;
+      max-width: 200px;
+      max-height: 80px;
+    }
+    .weather-icon {
+      width: 30px;
+      height: 30px;
+    }
+
+    .temperature {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .location {
+      font-size: 14px;
+      color: #555;
+    }
+
+    h2, label, p {
+      color: #895159;
+      margin: 8px 0;
+    }
+
+    input {
+      width: calc(100% - 16px);
+      padding: 8px;
+      box-sizing: border-box;
+      border-radius: 10px;
+      border: 1px solid;
+      margin-top: 20px;
+    }
+
+    button {
+      background: #babde2;
+      color: #895159;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 100px;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #fffcf5;
+    }
+
+    .weather-icon {
+      width: 100px;
+      height: 100px;
+      margin: 20px auto;
+    }
+
+    .temp-div p {
+      font-size: 24px;
+      margin-top: -10px;
+    }
+
+    .weather-info {
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bgimg"></div>
+
+  <div class="main-container">
+    <div class="card">
+      <h1>Sign in with Google</h1>
+      <p>Use your Google account to access</p>
+
+
+      <div id="g_id_onload"
+           data-client_id="932820086711-03ep1hjmq2g89c740un65jbiqh56pj1r.apps.googleusercontent.com"
+           data-context="signin"
+           data-ux_mode="popup"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-size="large"
+           data-theme="outline"
+           data-text="sign_in_with"
+           data-shape="rectangular"
+           data-logo_alignment="left">
+      </div>
+
+      <div id="user-info" style="display: none; margin-top: 20px;">
+        <h2>Welcome, <span id="user-name"></span>!</h2>
+        <p>Email: <span id="user-email"></span></p>
+        <img id="user-image" src="" alt="Profile Picture" style="width:100px; height:100px; border-radius:50%;">
+      </div>
+    </div>
+
+    <div class="weather-display">
+        <img id="weather-icon" class="weather-icon" alt="weather icon">
+        <div>
+          <div id="temperature" class="temperature"></div>
+          <div id="location" class="location"></div>
+        </div>
+      </div>
+
+  <script>
+    function handleCredentialResponse(response) {
+      const data = jwt_decode(response.credential);
+
+      const name = data.name;
+      const email = data.email;
+      const imageUrl = data.picture;
+
+      document.getElementById('user-name').innerText = name;
+      document.getElementById('user-email').innerText = email;
+      document.getElementById('user-image').src = imageUrl;
+
+      document.getElementById('user-info').style.display = 'block';
+    }
+
+    async function fetchWeather(lat, lon) {
+      const apiKey = '8cde2bda8fd86f86ec7045ed2628baf5';
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+      
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        
+        if (data.cod !== 200) {
+          alert("Failed to retrieve weather data.");
+          return;
+        }
+
+        document.getElementById("temperature").innerText = `${data.main.temp}°C`;
+        document.getElementById("location").innerText = data.name;
+        document.getElementById("weather-icon").src = `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        document.getElementById("weather-icon").alt = data.weather[0].description;
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+      }
+    }
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          fetchWeather(lat, lon);
+        }, () => {
+          alert("Location access denied. Unable to fetch weather data.");
+        });
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    }
+
+    window.onload = getLocation;
+  </script>
+</body>
+</html>
